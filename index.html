@@ -1,0 +1,443 @@
+<!DOCTYPE html><html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pick Up Central Mayorista</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-principal: #f8fafc;
+      --bg-tarjeta: #ffffff;
+      --texto-primario: #0f172a;
+      --texto-secundario: #475569;
+      --color-primario: #2563eb;
+      --color-primario-hover: #1d4ed8;
+      --color-peligro: #ef4444;
+      --color-peligro-hover: #dc2626;
+      --color-exito: #10b981;
+      --borde: #e2e8f0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-principal);
+      margin: 0;
+      padding: 40px 20px;
+      color: var(--texto-primario);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: 850px;
+      margin: auto;
+    }
+
+    header {
+      margin-bottom: 32px;
+    }
+
+    h1 {
+      font-size: 28px;
+      font-weight: 700;
+      margin: 0 0 6px 0;
+      letter-spacing: -0.5px;
+    }
+
+    header p {
+      color: var(--texto-secundario);
+      margin: 0;
+      font-size: 15px;
+    }
+
+    .card {
+      background: var(--bg-tarjeta);
+      padding: 24px;
+      border-radius: 12px;
+      border: 1px solid var(--borde);
+      box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+      margin-bottom: 24px;
+    }
+
+    h2 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-top: 0;
+      margin-bottom: 16px;
+      color: var(--texto-primario);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 2fr 1fr;
+      gap: 12px;
+    }
+
+    @media (max-width: 600px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .search-box {
+      display: flex;
+      gap: 10px;
+    }
+
+    input {
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--borde);
+      font-size: 14px;
+      font-family: inherit;
+      background: #fff;
+      color: var(--texto-primario);
+      transition: all 0.2s;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--color-primario);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    button {
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 10px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: var(--color-primario);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--color-primario-hover);
+    }
+
+    .btn-danger {
+      background: #fef2f2;
+      color: var(--color-peligro);
+      border: 1px solid #fee2e2;
+    }
+
+    .btn-danger:hover {
+      background: var(--color-peligro);
+      color: white;
+    }
+
+    .table-container {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 14px;
+    }
+
+    th {
+      background: #f8fafc;
+      color: var(--texto-secundario);
+      font-weight: 600;
+      padding: 14px 16px;
+      border-bottom: 2px solid var(--borde);
+    }
+
+    td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--borde);
+      color: var(--texto-primario);
+    }
+
+    tr:hover td {
+      background: #f8fafc;
+    }
+
+    .resultado {
+      font-size: 15px;
+      padding: 14px;
+      border-radius: 8px;
+      margin-top: 14px;
+      display: none;
+      font-weight: 500;
+    }
+    .resultado.encontrado {
+      display: block;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      color: #166534;
+    }
+    .resultado.no-encontrado {
+      display: block;
+      background: #fef2f2;
+      border: 1px solid #fee2e2;
+      color: #991b1b;
+    }
+
+    .btn-sku-link {
+      background: transparent;
+      color: var(--color-primario);
+      padding: 4px 8px;
+      font-size: 13px;
+      border: 1px dashed var(--color-primario);
+      border-radius: 6px;
+    }
+    .btn-sku-link:hover {
+      background: rgba(37, 99, 235, 0.05);
+    }
+
+    .vacío {
+      color: var(--texto-secundario);
+      text-align: center;
+      padding: 20px;
+      font-size: 14px;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 23, 42, 0.4);
+      backdrop-filter: blur(2px);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .modal-content {
+      background: white;
+      padding: 24px;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+    }
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 16px;
+    }
+    .btn-secondary {
+      background: #f1f5f9;
+      color: var(--texto-secundario);
+    }
+    .btn-secondary:hover {
+      background: #e2e8f0;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- SECCIÓN MODIFICADA: TÍTULO Y ENCABEZADO -->
+    <header>
+      <h1>🏬 Pick Up Central Mayorista</h1>
+      <p>Consulta de cantidad por pallet</p>
+    </header>
+
+    <!-- BUSCADOR -->
+    <div class="card">
+      <h2>🔎 Búsqueda de Productos</h2>
+      <div class="search-box">
+        <input type="text" id="buscarInput" placeholder="Escriba el nombre del producto o el código SKU..." />
+        <button class="btn-primary" onclick="buscarProducto()">Buscar</button>
+      </div>
+      <div class="resultado" id="resultado"></div>
+    </div>
+
+    <!-- AGREGAR -->
+    <div class="card">
+      <h2>➕ Registro de Nuevo Producto</h2>
+      <div class="form-grid">
+        <input type="text" id="skuProducto" placeholder="SKU (Opcional)" />
+        <input type="text" id="nombreProducto" placeholder="Nombre completo del producto" />
+        <input type="number" id="cantidadPallet" placeholder="Cantidad por pallet" />
+      </div>
+      <div style="margin-top: 14px; text-align: right;">
+        <button class="btn-primary" onclick="agregarProducto()">Guardar en Registro</button>
+      </div>
+    </div>
+
+    <!-- TABLA -->
+    <div class="card">
+      <h2>📋 Catálogo de Productos Registrados</h2>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 20%;">Código SKU</th>
+              <th style="width: 45%;">Descripción del Producto</th>
+              <th style="width: 20%;">Cant. por Pallet</th>
+              <th style="width: 15%; text-align: center;">Acción</th>
+            </tr>
+          </thead>
+          <tbody id="tablaProductos"></tbody>
+        </table>
+      </div>
+      <div class="vacío" id="mensajeVacio"></div>
+    </div>
+  </div>
+
+  <!-- MODAL ASIGNAR SKU -->
+  <div class="modal" id="skuModal">
+    <div class="modal-content">
+      <h2 style="margin-bottom: 8px;">Asignar Código SKU</h2>
+      <p id="modalProductoNombre" style="font-size: 13px; color: var(--texto-secundario); margin: 0 0 16px 0;"></p>
+      <input type="text" id="modalSkuInput" placeholder="Ingrese el nuevo SKU" />
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="cerrarModal()">Cancelar</button>
+        <button class="btn-primary" onclick="procesarAsignacionSku()">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let productos = JSON.parse(localStorage.getItem('productosPallet')) || [
+      { sku: '1001', nombre: 'Arroz 1kg', cantidad: 1200 },
+      { sku: '', nombre: 'Aceite 900ml', cantidad: 480 },
+      { sku: '1003', nombre: 'Leche 1L', cantidad: 960 }
+    ];
+
+    let indiceSeleccionadoParaSku = null;
+
+    function guardarLocal() {
+      localStorage.setItem('productosPallet', JSON.stringify(productos));
+    }
+
+    function mostrarProductos() {
+      const tabla = document.getElementById('tablaProductos');
+      const mensajeVacio = document.getElementById('mensajeVacio');
+      tabla.innerHTML = '';
+
+      if (productos.length === 0) {
+        mensajeVacio.textContent = 'No se encontraron registros en la base de datos.';
+        return;
+      }
+
+      mensajeVacio.textContent = '';
+
+      productos.forEach((producto, index) => {
+        const fila = document.createElement('tr');
+        
+        const celdaSku = producto.sku 
+          ? `<span style="font-family: monospace; font-weight: 600;">${producto.sku}</span>` 
+          : `<button class="btn-sku-link" onclick="abrirModalAsignarSku(${index})">+ Asignar SKU</button>`;
+
+        fila.innerHTML = `
+          <td>${celdaSku}</td>
+          <td>${producto.nombre}</td>
+          <td>${producto.cantidad.toLocaleString()}</td>
+          <td style="text-align: center;">
+            <button class="btn-danger" onclick="eliminarProducto(${index})">Eliminar</button>
+          </td>
+        `;
+        tabla.appendChild(fila);
+      });
+    }
+
+    function agregarProducto() {
+      const sku = document.getElementById('skuProducto').value.trim();
+      const nombre = document.getElementById('nombreProducto').value.trim();
+      const cantidad = document.getElementById('cantidadPallet').value;
+
+      if (!nombre || !cantidad) {
+        alert('Por favor, introduzca la descripción y cantidad por pallet.');
+        return;
+      }
+
+      if (sku) {
+        const skuExiste = productos.some(p => p.sku === sku);
+        if (skuExiste) {
+          alert('Error: Este código SKU ya se encuentra asignado.');
+          return;
+        }
+      }
+
+      productos.push({ sku, nombre, cantidad: Number(cantidad) });
+      guardarLocal();
+      mostrarProductos();
+
+      document.getElementById('skuProducto').value = '';
+      document.getElementById('nombreProducto').value = '';
+      document.getElementById('cantidadPallet').value = '';
+    }
+
+    function buscarProducto() {
+      const texto = document.getElementById('buscarInput').value.toLowerCase().trim();
+      const resultado = document.getElementById('resultado');
+
+      if (!texto) {
+        resultado.className = "resultado no-encontrado";
+        resultado.textContent = 'Por favor, ingrese un término de búsqueda.';
+        return;
+      }
+
+      const producto = productos.find(p =>
+        (p.sku && p.sku.toLowerCase() === texto) || 
+        p.nombre.toLowerCase().includes(texto)
+      );
+
+      if (producto) {
+        resultado.className = "resultado encontrado";
+        resultado.innerHTML = `${producto.nombre} — <strong>${producto.cantidad.toLocaleString()}</strong> de cantidad por pallet (SKU: ${producto.sku || 'No asignado'}).`;
+      } else {
+        resultado.className = "resultado no-encontrado";
+        resultado.textContent = 'Sin coincidencias';
+      }
+    }
+
+    function abrirModalAsignarSku(index) {
+      indiceSeleccionadoParaSku = index;
+      document.getElementById('modalProductoNombre').textContent = `Producto: ${productos[index].nombre}`;
+      document.getElementById('modalSkuInput').value = '';
+      document.getElementById('skuModal').style.display = 'flex';
+      document.getElementById('modalSkuInput').focus();
+    }
+
+    function cerrarModal() {
+      document.getElementById('skuModal').style.display = 'none';
+      indiceSeleccionadoParaSku = null;
+    }
+
+    function procesarAsignacionSku() {
+      const nuevoSku = document.getElementById('modalSkuInput').value.trim();
+      if (!nuevoSku) {
+        alert('Debe introducir un código válido.');
+        return;
+      }
+
+      const skuExiste = productos.some(p => p.sku === nuevoSku);
+      if (skuExiste) {
+        alert('Este código SKU ya pertenece a otro producto.');
+        return;
+      }
+
+      productos[indiceSeleccionadoParaSku].sku = nuevoSku;
+      guardarLocal();
+      mostrarProductos();
+      cerrarModal();
+    }
+
+    function eliminarProducto(index) {
+      if (confirm('¿Está seguro de que desea eliminar este registro de forma permanente?')) {
+        productos.splice(index, 1);
+        guardarLocal();
+        mostrarProductos();
+      }
+    }
+
+    mostrarProductos();
+  </script>
+</body>
+</html>
