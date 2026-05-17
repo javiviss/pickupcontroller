@@ -240,13 +240,11 @@
 <body>
 
   <div class="container">
-    <!-- SECCIÓN MODIFICADA: TÍTULO Y ENCABEZADO -->
     <header>
       <h1>🏬 Pick Up Central Mayorista</h1>
       <p>Consulta de cantidad por pallet</p>
     </header>
 
-    <!-- BUSCADOR -->
     <div class="card">
       <h2>🔎 Búsqueda de Productos</h2>
       <div class="search-box">
@@ -256,7 +254,6 @@
       <div class="resultado" id="resultado"></div>
     </div>
 
-    <!-- AGREGAR -->
     <div class="card">
       <h2>➕ Registro de Nuevo Producto</h2>
       <div class="form-grid">
@@ -269,7 +266,6 @@
       </div>
     </div>
 
-    <!-- TABLA -->
     <div class="card">
       <h2>📋 Catálogo de Productos Registrados</h2>
       <div class="table-container">
@@ -289,7 +285,6 @@
     </div>
   </div>
 
-  <!-- MODAL ASIGNAR SKU -->
   <div class="modal" id="skuModal">
     <div class="modal-content">
       <h2 style="margin-bottom: 8px;">Asignar Código SKU</h2>
@@ -302,18 +297,38 @@
     </div>
   </div>
 
-  <script>
-    let productos = JSON.parse(localStorage.getItem('productosPallet')) || [
-      { sku: '1001', nombre: 'Arroz 1kg', cantidad: 1200 },
-      { sku: '', nombre: 'Aceite 900ml', cantidad: 480 },
-      { sku: '1003', nombre: 'Leche 1L', cantidad: 960 }
-    ];
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
+  <script>
+    // LÍNEA 261: REEMPLAZA ESTO CON TUS CLAVES REALES DE LA CONSOLA DE FIREBASE
+    const firebaseConfig = {
+    apiKey: "AIzaSyBE1zX3gT8nPnbvxrPcRLD0Zx-N2iNgbgQ",
+    authDomain: "pickupcontroller.firebaseapp.com",
+    databaseURL: "https://pickupcontroller-default-rtdb.firebaseio.com",
+    projectId: "pickupcontroller",
+    storageBucket: "pickupcontroller.firebasestorage.app",
+    messagingSenderId: "728693291661",
+    appId: "1:728693291661:web:5bc8365984d9cb6aa280c4",
+    measurementId: "G-RTK78Z7MRW"
+  };
+
+
+    // Inicialización de la base de datos en la nube
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    let productos = [];
     let indiceSeleccionadoParaSku = null;
 
-    function guardarLocal() {
-      localStorage.setItem('productosPallet', JSON.stringify(productos));
-    }
+    // Escucha activa de cambios en Firebase Firestore
+    db.collection("productosPallet").onSnapshot((snapshot) => {
+      productos = [];
+      snapshot.forEach((doc) => {
+        productos.push({ id: doc.id, ...doc.data() });
+      });
+      mostrarProductos();
+    });
 
     function mostrarProductos() {
       const tabla = document.getElementById('tablaProductos');
@@ -339,7 +354,7 @@
           <td>${producto.nombre}</td>
           <td>${producto.cantidad.toLocaleString()}</td>
           <td style="text-align: center;">
-            <button class="btn-danger" onclick="eliminarProducto(${index})">Eliminar</button>
+            <button class="btn-danger" onclick="eliminarProducto('${producto.id}')">Eliminar</button>
           </td>
         `;
         tabla.appendChild(fila);
@@ -349,9 +364,9 @@
     function agregarProducto() {
       const sku = document.getElementById('skuProducto').value.trim();
       const nombre = document.getElementById('nombreProducto').value.trim();
-      const cantidad = document.getElementById('cantidadPallet').value;
+      const MathCantidad = document.getElementById('cantidadPallet').value;
 
-      if (!nombre || !cantidad) {
+      if (!nombre || !MathCantidad) {
         alert('Por favor, introduzca la descripción y cantidad por pallet.');
         return;
       }
@@ -364,13 +379,18 @@
         }
       }
 
-      productos.push({ sku, nombre, cantidad: Number(cantidad) });
-      guardarLocal();
-      mostrarProductos();
-
-      document.getElementById('skuProducto').value = '';
-      document.getElementById('nombreProducto').value = '';
-      document.getElementById('cantidadPallet').value = '';
+      // Guardar registro en la nube
+      db.collection("productosPallet").add({
+        sku: sku,
+        nombre: nombre,
+        cantidad: Number(MathCantidad)
+      }).then(() => {
+        document.getElementById('skuProducto').value = '';
+        document.getElementById('nombreProducto').value = '';
+        document.getElementById('cantidadPallet').value = '';
+      }).catch((error) => {
+        alert("Error al intentar guardar el registro: " + error);
+      });
     }
 
     function buscarProducto() {
@@ -423,21 +443,25 @@
         return;
       }
 
-      productos[indiceSeleccionadoParaSku].sku = nuevoSku;
-      guardarLocal();
-      mostrarProductos();
-      cerrarModal();
+      const idProducto = productos[indiceSeleccionadoParaSku].id;
+
+      // Actualizar el documento por su ID en Firebase
+      db.collection("productosPallet").doc(idProducto).update({
+        sku: nuevoSku
+      }).then(() => {
+        cerrarModal();
+      }).catch((error) => {
+        alert("Error al intentar asignar el SKU: " + error);
+      });
     }
 
-    function eliminarProducto(index) {
+    function eliminarProducto(id) {
       if (confirm('¿Está seguro de que desea eliminar este registro de forma permanente?')) {
-        productos.splice(index, 1);
-        guardarLocal();
-        mostrarProductos();
+        db.collection("productosPallet").doc(id).delete().catch((error) => {
+          alert("Error al intentar eliminar: " + error);
+        });
       }
     }
-
-    mostrarProductos();
   </script>
 </body>
 </html>
